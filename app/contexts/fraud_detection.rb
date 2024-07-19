@@ -29,6 +29,8 @@ module FraudDetection
         validation_datetime.end_of_day
       )
         amount + transaction.transaction_amount
+      else
+        amount
       end
     end
 

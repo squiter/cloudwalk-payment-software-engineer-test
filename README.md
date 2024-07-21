@@ -31,6 +31,17 @@ This project depends on some environment variables, you could use [direnv](https
 
 If you need to inject the data from `transactional-samples.csv` you could run: `rake data:inject`
 
+
+## Running the App and testing
+
+To run the app you just need to load the environment variables, run the migrations and the server and make the HTTP posts:
+
+```
+. .envrc # or direnv allow if you have direnv installed
+make setup
+bin/rails s
+```
+
 ```
 curl http://localhost:3000/transactions/check -X POST \
     -H 'Content-Type: application/json' \

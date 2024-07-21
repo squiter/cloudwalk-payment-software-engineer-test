@@ -8,11 +8,12 @@ module FraudDetection
 
   def self.too_many_transactions_in_a_row?(transactions, transaction_to_validate)
     validation_datetime = transaction_to_validate[:transaction_date].to_datetime
+    ttl_transc_lock = Rails.configuration.ttl_transc_lock.to_i
 
     transactions_in_a_row = transactions.select do |transaction|
       transaction.transaction_date.between?(
-        validation_datetime - 10.minutes,
-        validation_datetime + 10.minutes
+        validation_datetime - ttl_transc_lock.minutes,
+        validation_datetime + ttl_transc_lock.minutes
       )
     end
 
@@ -34,7 +35,7 @@ module FraudDetection
       end
     end
 
-    daily_amount > 10_000.0
+    daily_amount > Rails.configuration.daily_limit.to_d
   end
 
   def self.had_chargeback_before?(transactions)

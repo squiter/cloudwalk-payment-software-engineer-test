@@ -1,7 +1,7 @@
 class CreateTransactions < ActiveRecord::Migration[7.1]
   def change
     create_table :transactions, id: false do |t|
-      t.bigint :transaction_id, index: true
+      t.bigint :transaction_id, primary_key: true
       t.bigint :merchant_id, null: false
       t.bigint :user_id, null: false
       t.string :card_number, null: false, limit: 17

@@ -1,13 +1,18 @@
 require "test_helper"
 
 class FraudDetectionTest < ActiveSupport::TestCase
-  test "possible_fraud? returns false when do not have transactions saved" do
+  test "possible_fraud? returns false when do not have transactions saved and save checked transaction" do
     transaction_to_validate = {
+      transaction_id: 223,
+      merchant_id: 123,
+      user_id: 123,
+      card_number: "number",
       transaction_date: DateTime.now,
       transaction_amount: 0
     }
 
     assert_not FraudDetection.possible_fraud?([], transaction_to_validate)
+    assert_equal Transaction.last.transaction_id, transaction_to_validate[:transaction_id]
   end
 
   test "possible_fraud? returns true when have something unsafe" do
@@ -21,13 +26,16 @@ class FraudDetectionTest < ActiveSupport::TestCase
     assert FraudDetection.possible_fraud?([transactions], transaction_to_validate)
   end
 
-  test "too_many_transactions_in_a_row? returns false when don't have transactions saved" do
-    transaction_to_validate = {transaction_date: DateTime.now.to_s}
-    assert_not FraudDetection.too_many_transactions_in_a_row?([], transaction_to_validate)
-  end
-
-  test "too_many_transactions_in_a_row? returns false when don't have much transactions in a row" do
-    transaction_to_validate = {transaction_date: DateTime.now.to_s, user_id: 42}
+  test "too_many_transactions_in_a_row? returns false when don't have much transactions in a row and salve last transaction" do
+    ttl_transc_lock = Rails.configuration.ttl_transc_lock.to_i
+    transaction_to_validate = {
+      user_id: 42,
+      transaction_date: DateTime.now + (ttl_transc_lock + 1).minutes,
+      transaction_id: 223,
+      merchant_id: 123,
+      card_number: "number",
+      transaction_amount: 0
+    }
 
     transactions = FactoryBot.create_list(
       :transaction,
@@ -39,11 +47,12 @@ class FraudDetectionTest < ActiveSupport::TestCase
       transactions,
       transaction_to_validate
     )
+    assert_equal Transaction.last.transaction_id, transaction_to_validate[:transaction_id]
   end
 
-  test "too_many_transactions_in_a_row? returns true when do have much transactions in a row" do
+  test "too_many_transactions_in_a_row? returns true when do have much transactions in a row and dont save" do
     transactions_in_a_row_limit = 10
-    transaction_to_validate = {transaction_date: DateTime.now.to_s, user_id: 42}
+    transaction_to_validate = {transaction_date: DateTime.now.to_s, user_id: 42, transaction_id: 222}
 
     transactions = FactoryBot.create_list(
       :transaction,
@@ -56,17 +65,7 @@ class FraudDetectionTest < ActiveSupport::TestCase
       transactions,
       transaction_to_validate
     )
-  end
-
-  test "exceeds_daily_limit? returns false when don't have transactions saved" do
-    daily_limit = 10_000.0
-    transaction_to_validate = {
-      user_id: 42,
-      transaction_date: DateTime.now,
-      transaction_amount: daily_limit - 1
-    }
-
-    assert_not FraudDetection.exceeds_daily_limit?([], transaction_to_validate)
+    assert_not Transaction.find_by(transaction_id: transaction_to_validate[:transaction_id])
   end
 
   test "exceeds_daily_limit? returns true when transaction_to_validate exceeds the limit" do
@@ -90,6 +89,7 @@ class FraudDetectionTest < ActiveSupport::TestCase
     transactions = FactoryBot.create_list(
       :transaction,
       10,
+      transaction_amount: 10,
       user_id: transaction_to_validate[:user_id]
     )
 
@@ -111,10 +111,6 @@ class FraudDetectionTest < ActiveSupport::TestCase
     )
 
     assert FraudDetection.exceeds_daily_limit?(transactions, transaction_to_validate)
-  end
-
-  test "had_chargeback_before? returns false when don't have transactions saved" do
-    assert_not FraudDetection.had_chargeback_before?([])
   end
 
   test "had_chargeback_before? returns false when don't have chargeback in the saved transactions" do

@@ -18,6 +18,8 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     params = {
       transaction: {
         transaction_id: 42,
+        merchant_id: 23,
+        card_number: "number",
         transaction_date: DateTime.now,
         transaction_amount: 42.0,
         user_id: 42
@@ -38,6 +40,8 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     params = {
       transaction: {
         transaction_id: 42,
+        merchant_id: 23,
+        card_number: "number",
         transaction_date: DateTime.now,
         transaction_amount: 42.0,
         user_id: 42

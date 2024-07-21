@@ -29,7 +29,7 @@ module CloudwalkFraudTest
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    config.ttl_transc_lock = ENV["CW_TTL_TRANSC_LOCK_IN_MINUTES"]
+    config.ttl_transc_lock = ENV["CW_TTL_TRANSC_LOCK_IN_SECONDS"]
     config.daily_limit = ENV["CW_DAILY_LIMIT"]
   end
 end

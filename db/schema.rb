@@ -14,8 +14,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_152141) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "transactions", id: false, force: :cascade do |t|
-    t.bigint "transaction_id"
+  create_table "transactions", primary_key: "transaction_id", force: :cascade do |t|
     t.bigint "merchant_id", null: false
     t.bigint "user_id", null: false
     t.string "card_number", limit: 17, null: false
@@ -25,7 +24,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_152141) do
     t.boolean "has_cbk", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["transaction_id"], name: "index_transactions_on_transaction_id"
   end
 
 end

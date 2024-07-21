@@ -3,17 +3,19 @@ class TransactionsController < ActionController::Base
 
   def check
     to_check = transaction_params
-    transactions = Transaction.where(user_id: to_check[:user_id]).order(:transaction_date)
 
-    if has_required_params?(to_check)
-      # TODO: Save to_check to validate future transactions
-      render json: build_response(
-        to_check[:transaction_id],
-        FraudDetection.possible_fraud?(transactions, to_check) ? "deny" : "approve"
-      )
-    else
-      render json: { "error": "Missing required params" },
-        status: :unprocessable_entity
+    Transaction.lock do
+      transactions = Transaction.where(user_id: to_check[:user_id]).order(:transaction_date)
+
+      if has_required_params?(to_check)
+        render json: build_response(
+          to_check[:transaction_id],
+          FraudDetection.possible_fraud?(transactions, to_check) ? "deny" : "approve"
+        )
+      else
+        render json: { "error": "Missing required params" },
+          status: :unprocessable_entity
+      end
     end
   end
 

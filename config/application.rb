@@ -31,5 +31,8 @@ module CloudwalkFraudTest
 
     config.ttl_transc_lock = ENV["CW_TTL_TRANSC_LOCK_IN_SECONDS"]
     config.daily_limit = ENV["CW_DAILY_LIMIT"]
+
+    config.redis_host = ENV["CW_REDIS_HOST"]
+    config.redis_port = ENV["CW_REDIS_PORT"]
   end
 end

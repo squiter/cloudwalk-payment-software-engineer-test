@@ -22,7 +22,7 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
         card_number: "number",
         transaction_date: DateTime.now,
         transaction_amount: 42.0,
-        user_id: 42
+        user_id: rand(1..1000)
       }
     }
 
@@ -44,7 +44,7 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
         card_number: "number",
         transaction_date: DateTime.now,
         transaction_amount: 42.0,
-        user_id: 42
+        user_id: rand(1..1000)
       }
     }
 

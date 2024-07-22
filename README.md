@@ -4,7 +4,7 @@ The answers for the questions in the part 3 of the hiring test are in the end of
 
 ## Considerations about the implementation
 
-For this test I decided to build a simple Rails API with PostgreSQL. This Database is used as a cache or temporary data to enable us to define if a transaction should be approved or denied given our fraud detection rules.
+For this test I decided to build a simple Rails API with PostgreSQL and a Redis to control the lock system. This Database is used as a cache or temporary data to enable us to define if a transaction should be approved or denied given our fraud detection rules.
 
 ### Flexible parameters
 
@@ -15,13 +15,13 @@ To setup those values we just need to export some variables:
 ```
 export CW_TTL_TRANSC_LOCK_IN_SECONDS=600
 export CW_DAILY_LIMIT=10000
+export CW_REDIS_HOST=localhost
+export CW_REDIS_PORT=6379
 ```
 
 ### Dealing with too many requests from an user
 
-In this implementation I used a simple database table lock to control this flow, forcing each query to the database be sequential and comparing the `transaction_date` of the transaction to be validated to be greater than our `ttl_transc_lock` configuration.
-
-That same outcome could be achieved in different ways in production if the team seems fit, for example we could be saving a row at Redis with the `user_id` and a `TTL` equals to our `ttl_transc_lock` and only saving new entries when that key was gone from Redis.
+This implementation uses Redis to lock a client for a `ttl_transc_lock` seconds until we're able to receive new transactions.
 
 ## Up & Running
 
